@@ -1,9 +1,6 @@
 package kafka
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -39,30 +36,31 @@ func kafkaTopicDataSource() *schema.Resource {
 func dataSourceTopicRead(d *schema.ResourceData, meta interface{}) error {
 	// Unlike the resource topicRead, there is no pre-existing ID. We must use the 'name' to look up the resource.
 	// See https://learn.hashicorp.com/tutorials/terraform/provider-create?in=terraform/providers#implement-read
-	name := d.Get("name").(string)
 
-	client := meta.(*LazyClient)
-	topic, err := client.ReadTopic(name, true)
+	// name := d.Get("name").(string)
 
-	if err != nil {
-		log.Printf("[ERROR] Error getting topic %s from Kafka: %s", name, err)
-		_, ok := err.(TopicMissingError)
+	// topic, err := client.ReadTopic(name, true) //lambda call to get a topic
 
-		if ok {
-			return fmt.Errorf("Could not find topic '%s'", name)
-		}
+	// if err != nil {
+	// 	log.Printf("[ERROR] Error getting topic %s from Kafka: %s", name, err)
+	// 	_, ok := err.(TopicMissingError)
 
-		return err
-	}
+	// 	if ok {
+	// 		return fmt.Errorf("Could not find topic '%s'", name)
+	// 	}
 
-	log.Printf("[DEBUG] Setting the state from Kafka %v", topic)
-	errSet := errSetter{d: d}
-	errSet.Set("name", topic.Name)
-	errSet.Set("partitions", topic.Partitions)
-	errSet.Set("replication_factor", topic.ReplicationFactor)
-	errSet.Set("config", topic.Config)
+	// 	return err
+	// }
 
-	// Set the id to the name
-	d.SetId(name)
-	return errSet.err
+	// log.Printf("[DEBUG] Setting the state from Kafka %v", topic)
+	// errSet := errSetter{d: d}
+	// errSet.Set("name", topic.Name)
+	// errSet.Set("partitions", topic.Partitions)
+	// errSet.Set("replication_factor", topic.ReplicationFactor)
+	// errSet.Set("config", topic.Config)
+
+	// // Set the id to the name
+	// d.SetId(name)
+	// return errSet.err
+	return nil
 }

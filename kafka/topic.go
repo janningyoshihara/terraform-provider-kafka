@@ -1,10 +1,6 @@
 package kafka
 
 import (
-	"errors"
-	"fmt"
-
-	"github.com/IBM/sarama"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -22,45 +18,6 @@ func (t *Topic) Equal(other Topic) bool {
 		return true
 	}
 	return false
-}
-
-// ReplicaCount returns the replication_factor for a partition
-// Returns an error if it cannot determine the count, or if the number of
-// replicas is different across partitions
-func ReplicaCount(c sarama.Client, topic string, partitions []int32) (int, error) {
-	count := -1
-
-	for _, p := range partitions {
-		replicas, err := c.Replicas(topic, p)
-		if err != nil {
-			return -1, errors.New("Could not get replicas for partition")
-		}
-		if count == -1 {
-			count = len(replicas)
-		}
-		if count != len(replicas) {
-			return count, fmt.Errorf("The replica count isn't the same across partitions %d != %d", count, len(replicas))
-		}
-	}
-	return count, nil
-
-}
-
-func configToResources(topic Topic) []*sarama.AlterConfigsResource {
-	return []*sarama.AlterConfigsResource{
-		{
-			Type:          sarama.TopicResource,
-			Name:          topic.Name,
-			ConfigEntries: topic.Config,
-		},
-	}
-}
-
-func isDefault(tc *sarama.ConfigEntry, version int) bool {
-	if version == 0 {
-		return tc.Default
-	}
-	return tc.Source == sarama.SourceDefault || tc.Source == sarama.SourceStaticBroker
 }
 
 func metaToTopic(d *schema.ResourceData, meta interface{}) Topic {
